@@ -11,7 +11,10 @@ def marker_color(df):
     tstrength = ["    "]*len(df)              # test_strength based on Fr0
     
     for i in range (len(df)):
-        df.at[i,'Test_name'] = df.at[i,'Test_name'].decode('utf-8') #fixing problem with undefined strings
+        # Decode string only if it is a bytes object
+        if isinstance(df.at[i, 'Test_name'], bytes):
+            df.at[i, 'Test_name'] = df.at[i, 'Test_name'].decode('utf-8')  # Fixing problem with undefined strings
+
         if df.at[i,'Test_name'][-1]=="1":
             df.at[i,'Test_name'] = df.at[i,'Test_name'][:-1]
         ##########################
