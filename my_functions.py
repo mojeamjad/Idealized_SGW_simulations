@@ -64,7 +64,7 @@ def marker_color(df):
     
     # Create legend entries for markers (test names)
     marker_legend = [
-        Line2D([0], [0], marker=marker, color='w', label=f'Test: {name}', 
+        Line2D([0], [0], marker=marker, color='w', label=f'{name}', 
                markerfacecolor='black', markersize=10, linestyle='None',alpha=0.6)
         for name, marker in zip(tnames, marks2)]
     
@@ -116,11 +116,11 @@ def s_transfer(ft,dt):
         stf[:,fInd] = scr 
         
     real_ff = ff[1:int(num/2)+1]*twopi/dt
-    cff = abs(np.fft.rfft(ft)[1::])
-    
+    cff = abs(np.fft.rfft(ft)[0:-1])
+    cff[0] =0
     return abs(stf.T),cff,real_ff
 ########################################################################    
-def S2(lon,time,height,u0,m_u,fig,ax,title_name=None):
+def S2(lon,time,height,u0,m_u,fig,ax,title_name=None,lim=None):
     import numpy as np
     from matplotlib.ticker import (MultipleLocator,  AutoMinorLocator, ScalarFormatter)
     import matplotlib as mlt
@@ -132,15 +132,14 @@ def S2(lon,time,height,u0,m_u,fig,ax,title_name=None):
     xv, yv = np.meshgrid(distance, height)
     u_p = u0 - m_u[:, np.newaxis]
 
-    # lim = abs(u0).max()*2/3 # colormap max range : Supplementary
-    lim = abs(u0).max()/3 # colormap max range    : Main article
+    if lim == None: lim = abs(u_p).max()*3/4 # colormap max range
 
     levels = np.linspace(-1,1,41)*lim
     norm = mlt.colors.Normalize(vmin=levels[0], vmax=levels[-1], clip=False)
     
     #fig,ax = plt.subplots(figsize=(7,10))
     
-    pl = ax.contourf(xv,yv,u_p,levels,origin='upper',cmap='bwr',norm=norm)
+    pl = ax.contourf(xv,yv,u_p,levels,origin='upper',cmap='bwr',norm=norm,extend='both')
     
     ax.set_ylim(0,150)
     ax.tick_params(axis='both', which='major',  length=8, width=3, direction ='in'
@@ -164,25 +163,25 @@ def S2(lon,time,height,u0,m_u,fig,ax,title_name=None):
     ax.xaxis.set_major_locator(MultipleLocator(maj_loc)) 
     ax.xaxis.set_minor_locator(MultipleLocator(min_loc))
     for label in ax.get_xticklabels():
-        label.set_rotation(-30)
+        label.set_rotation(30)
         
     title_time = f"(t={round(time, 1)} day, y=0.0)"
     ax.text(
-        0.3, 1.03,  # Same position for alignment
+        0.01, 1.03,  # Same position for alignment
         title_name, fontweight='bold',
         fontsize=19,  # Larger font size for the main title
-        ha='right', va='center', transform=ax.transAxes  # Use relative coordinates
+        ha='left', va='center', transform=ax.transAxes  # Use relative coordinates
     )
     ax.text(
         0.5, 1.03,  # Position above the plot (relative to axes)
         f"{title_time}", fontsize=15,  # Font size for the entire string
         ha='left', va='center', transform=ax.transAxes  # Use relative coordinates
     )
-    cax = ax.inset_axes([0.05, 0.07, 0.2, 0.02])
+    cax = ax.inset_axes([0.12, 0.08, 0.3, 0.02])
     cbar = fig.colorbar(pl,cax=cax, orientation='horizontal' ,ticks=[int(levels[0]),0, int(levels[-1])])
     cbar.ax.tick_params(labelsize=16)
     cbar.ax.set_xticklabels([int(levels[0]),0, int(levels[-1])])  # horizontal colorbar
-    cbar.ax.set_title("$u'$ (m/s)", fontsize=16)
+    cbar.ax.set_title("zon wind ano (m/s)", fontsize=14)
  
 ########################################################################  
 def S3(time,height,std_u,ax=None,title_name=None):
@@ -192,7 +191,7 @@ def S3(time,height,std_u,ax=None,title_name=None):
     import matplotlib as mlt
     import matplotlib.pyplot as plt
     plt.rc('axes', linewidth=2)
-    plt.rcParams['font.size'] = '20'
+    plt.rcParams['font.size'] = '18'
     
     #fig,ax = plt.subplots(figsize=(7,10))
     ax.plot(height,std_u)
@@ -224,10 +223,10 @@ def S3(time,height,std_u,ax=None,title_name=None):
         
     title_time = f"(t={round(time, 1)} day)"
     ax.text(
-        0.3, 1.03,  # Same position for alignment
+        0.01, 1.03,  # Same position for alignment
         title_name, fontweight='bold',
         fontsize=19,  # Larger font size for the main title
-        ha='right', va='center', transform=ax.transAxes  # Use relative coordinates
+        ha='left', va='center', transform=ax.transAxes  # Use relative coordinates
     )
     ax.text(
         0.5, 1.03,  # Position above the plot (relative to axes)
@@ -262,10 +261,10 @@ def S4(lon,time,height,u0,m_u,ax=None,title_name=None):
         
     title_time = f"(t={round(time, 1)} day, y=0.0)"
     ax.text(
-        0.3, 1.03,  # Same position for alignment
+        0.01, 1.03,  # Same position for alignment
         title_name, fontweight='bold',
         fontsize=19,  # Larger font size for the main title
-        ha='right', va='center', transform=ax.transAxes  # Use relative coordinates
+        ha='left', va='center', transform=ax.transAxes  # Use relative coordinates
     )
     ax.text(
         0.5, 1.03,  # Position above the plot (relative to axes)
@@ -302,18 +301,18 @@ def S5(time,height,a_x2,ax=None,title_name=None):
     
     title_time = f"(t={round(time, 1)} day, x=0.0, y=0.0)"
     ax.text(
-        0.4, 1.03,  # Same position for alignment
+        0.3, 1.03,  # Same position for alignment
         title_name, fontweight='bold',
         fontsize=19,  # Larger font size for the main title
         ha='right', va='center', transform=ax.transAxes  # Use relative coordinates
     )
     ax.text(
-        0.5, 1.03,  # Position above the plot (relative to axes)
+        0.4, 1.03,  # Position above the plot (relative to axes)
         f"{title_time}", fontsize=15,  # Font size for the entire string
         ha='left', va='center', transform=ax.transAxes  # Use relative coordinates
     )
 ########################################################################    
-def S6(fig, spec, lon,time,z,uu,powerd, spectrum, freq,title_name):
+def S6(fig, spec, lon,time,z,uu,powerd, spectrum, freq,title_name,min_l=None,max_l=None,max_y=None):
     import numpy as np
     from matplotlib import pyplot as plt
     import matplotlib as mlt
@@ -354,10 +353,10 @@ def S6(fig, spec, lon,time,z,uu,powerd, spectrum, freq,title_name):
     
     title_time = f"(t={round(time, 1)} day, y=0.0, z={z} )" 
     axu.text(
-        0.2, 1.13,  # Same position for alignment
+        0.01, 1.13,  # Same position for alignment
         title_name, fontweight='bold',
         fontsize=19,  # Larger font size for the main title
-        ha='right', va='center', transform=axu.transAxes  # Use relative coordinates
+        ha='left', va='center', transform=axu.transAxes  # Use relative coordinates
     )
     axu.text(
         0.4, 1.13,  # Position above the plot (relative to axes)
@@ -373,14 +372,17 @@ def S6(fig, spec, lon,time,z,uu,powerd, spectrum, freq,title_name):
     mean_r =  np.mean(powerd[:,mid_ind_lon+xrange:-5],axis=1) # 
     mean_l =  np.mean(powerd[:,5:mid_ind_lon-xrange],axis=1) 
         
-    p1, = axm2.plot(mean_l,freq,'blue', label='P1')
-    p2, = axm2.plot(mean_m,freq,'red', label='P2')
-    p3, = axm2.plot(mean_r,freq,'green', label='P3')
-    p4, = axm.plot(spectrum[:],freq[:],'--k', label='FFT')
+    p1, = axm2.plot(mean_l,freq,'blue', label='P1',zorder=1)
+    p2, = axm2.plot(mean_m,freq,'red', label='P2',zorder=1)
+    p3, = axm2.plot(mean_r,freq,'green', label='P3',zorder=1)
+    
+    axm.set_zorder(3)  # Bring secondary axis to the front
+    axm.patch.set_visible(False)  # Hide background of secondary axis
+    p4, = axm.plot(spectrum[:],freq[:],'--k', label='FFT',zorder=4)
     
     axm2.set_xticklabels([])
 
-    max_y = freq[-1]/4
+    if max_y == None: max_y = freq[-1]/4
     axm.set_ylim([0, max_y])
     # axm.set_xlim([-0.1, None])
     axm.set_yticklabels([])
@@ -401,15 +403,14 @@ def S6(fig, spec, lon,time,z,uu,powerd, spectrum, freq,title_name):
     
     axm.set_xlabel('Intensity',fontsize=14)
     ################
+    if max_l is None:
+        max_l = round(np.max(powerd), 3)  # Activate for the main article
+        min_l = round(max_l / 2, 3) if max_l < 1 else round(max_l / 2, 2)
 
-    max_l = round(np.max(powerd),3)  # activate for the main article
-    min_l = round(max_l / 4, 3) if max_l < 1 else round(max_l / 3.2, 2)
-    # max_l = round(np.max(powerd),2) # activate for the Supplementary
-    # min_l = round(max_l / 4, 2) if max_l < 1 else round(max_l / 3.2, 1)
-    levels = np.linspace(min_l,max_l,11) 
-    norm = mlt.colors.Normalize(vmin=levels[0], vmax=levels[-1], clip=False)    
+    levels = np.linspace(min_l, max_l, 11) 
+    norm = mlt.colors.Normalize(vmin=levels[0], vmax=levels[-1], clip=False)  # ✅ Explicit vmax
     
-    pl = axs.contourf(distance,freq,powerd,norm=norm, levels=levels,alpha=0.8)
+    pl = axs.contourf(distance, freq, powerd, norm=norm, levels=levels, alpha=0.8, extend='max')
         
     axs.set_ylim([0, max_y])
     axs.set_xlim([distance.min(), distance.max()])
@@ -427,13 +428,13 @@ def S6(fig, spec, lon,time,z,uu,powerd, spectrum, freq,title_name):
     cax = axs.inset_axes([0.07, 0.9, 0.4, 0.025])
     cbar = fig.colorbar(pl,cax=cax, orientation='horizontal',ticks=[levels[0],levels[int(len(levels)/2)],levels[-1]] )
     cbar.ax.tick_params(labelsize=17)
-    cbar.ax.set_title("Intensity", fontsize=17)
+    cbar.ax.set_title("zon wind power", fontsize=17)
     cbar.ax.set_xticklabels([levels[0],round(levels[int(len(levels)/2)],3), levels[-1]])  # horizontal colorbar
    
     return axs,axu
     
 ########################################################################    
-def S7(fig, spec, height,time,x,uu,powerd,spectrum, freq,title_name=None):
+def S7(fig, spec, height,time,x,uu,powerd,spectrum, freq,title_name=None,min_l=None,max_l=None,max_y=None):
     import numpy as np
     from matplotlib import pyplot as plt
     import matplotlib as mlt
@@ -456,10 +457,11 @@ def S7(fig, spec, height,time,x,uu,powerd,spectrum, freq,title_name=None):
         
     u_r = round(uu[-1]) # background wind (m/s)
     # print(u_r)
-    if u_r < 8:       max_y = 10.1 ; maj_loc = 2   # light breeze  u0~5
-    if 8  < u_r < 15: max_y = 5.05 ; maj_loc = 1   # fresh breeze  u0~10
-    if 15 < u_r < 25: max_y = 3.02 ; maj_loc = 0.5 # fresh gale    u0~20
-    if u_r >  30:     max_y = 1.52 ; maj_loc = 0.2 # hurricane     u0~40
+    if max_y==None:
+        if u_r < 8:       max_y = 10.1 ; maj_loc = 2   # light breeze  u0~5
+        if 8  < u_r < 15: max_y = 5.05 ; maj_loc = 1   # fresh breeze  u0~10
+        if 15 < u_r < 25: max_y = 3.02 ; maj_loc = 0.5 # fresh gale    u0~20
+        if u_r >  30:     max_y = 1.52 ; maj_loc = 0.2 # hurricane     u0~40
     ################
     
     # axu.set_title("\ny=0,z="+str(round(z))+",t="+str(round(time,2))+"(day)",y=1.1,x=0.6, pad=+14)
@@ -469,10 +471,10 @@ def S7(fig, spec, height,time,x,uu,powerd,spectrum, freq,title_name=None):
     
     title_time = f"(t={round(time, 1)} day, y=0.0, x={x}km)" 
     axu.text(
-        0.2, 1.13,  # Same position for alignment
+        0.01, 1.13,  # Same position for alignment
         title_name, fontweight='bold',
         fontsize=19,  # Larger font size for the main title
-        ha='right', va='center', transform=axu.transAxes  # Use relative coordinates
+        ha='left', va='center', transform=axu.transAxes  # Use relative coordinates
     )
     axu.text(
         0.4, 1.13,  # Position above the plot (relative to axes)
@@ -520,13 +522,13 @@ def S7(fig, spec, height,time,x,uu,powerd,spectrum, freq,title_name=None):
     
     axm.set_xlabel('Intensity',fontsize=14)
     # ################
-
-    max_l = round(np.max(powerd),2)
-    min_l = round(max_l / 4, 3) if max_l < 1 else round(max_l / 3.2, 2)
+    if max_l==None:
+        max_l = round(np.max(powerd),2)
+        min_l = round(max_l / 4, 3) if max_l < 1 else round(max_l / 3.2, 2)
     levels = np.linspace(min_l,max_l,11) 
     norm = mlt.colors.Normalize(vmin=levels[0], vmax=levels[-1], clip=False)    
     
-    pl = axs.contourf(height,freq,powerd,norm=norm, levels=levels,alpha=0.8)
+    pl = axs.contourf(height,freq,powerd,norm=norm, levels=levels,alpha=0.8,extend='max')
         
     axs.set_ylim([0, max_y])
     axs.set_xlim([0, 151])
@@ -544,10 +546,58 @@ def S7(fig, spec, height,time,x,uu,powerd,spectrum, freq,title_name=None):
     cax = axs.inset_axes([0.07, 0.9, 0.4, 0.025])    
     cbar = fig.colorbar(pl,cax=cax, orientation='horizontal',ticks=[levels[0],levels[int(len(levels)/2)],levels[-1]] )
     cbar.ax.tick_params(labelsize=17)
-    cbar.ax.set_title("Intensity", fontsize=17)
+    cbar.ax.set_title("zon wind power", fontsize=17)
     cbar.ax.set_xticklabels([levels[0],round(levels[int(len(levels)/2)],2), levels[-1]])  # horizontal colorbar
 
    
     return axs,axu
 ########################################################################    
-    
+def lat_lon(lat, lon, time, uh, m_u, height, fig, ax, title_name ,lim=None):    
+    import numpy as np
+    from matplotlib.ticker import (MultipleLocator,  AutoMinorLocator, ScalarFormatter)
+    import matplotlib as mlt
+    import matplotlib.pyplot as plt
+    plt.rc('axes', linewidth=2)
+    plt.rcParams['font.size'] = '18'
+    m_u100 = m_u[np.argmin(np.abs(height - 100))]
+    u_p = uh - m_u100
+    distancex = lon*110 # zonal distance (km)
+    distancey = lat*110 # meridional distance (km)
+    xv, yv = np.meshgrid(distancex, distancey)
+    if lim == None: lim = abs(u_p).max() # colormap max range : Supplementary
+
+    levels = np.linspace(-1,1,41)*lim
+    norm = mlt.colors.Normalize(vmin=levels[0], vmax=levels[-1], clip=False)
+
+    pl = ax.contourf(xv,yv,u_p,origin='upper',levels=levels,cmap='bwr',norm=norm, extend='both')
+    ax.tick_params(axis='both', which='major',  length=8, width=3, direction ='in'
+           , top=True, right=True)
+    ax.tick_params(axis='both', which='minor',  length=4, width=1.5, direction ='in'
+               , top=True, right=True)
+              
+    ax.xaxis.set_major_locator(MultipleLocator(300)) 
+    ax.xaxis.set_minor_locator(MultipleLocator(100))          
+    ax.yaxis.set_major_locator(MultipleLocator(300)) 
+    ax.yaxis.set_minor_locator(MultipleLocator(100))
+    for label in ax.get_xticklabels():
+        label.set_rotation(30)
+    for label in ax.get_yticklabels():
+        label.set_rotation(30)
+
+    # title_time = f"(t={round(time, 1)} day, y=0.0)"
+    # ax.text(
+    #     0.01, 1.03,  # Same position for alignment
+    #     title_name, fontweight='bold',
+    #     fontsize=19,  # Larger font size for the main title
+    #     ha='left', va='center', transform=ax.transAxes  # Use relative coordinates
+    # )
+    # ax.text(
+    #     0.5, 1.03,  # Position above the plot (relative to axes)
+    #     f"{title_time}", fontsize=15,  # Font size for the entire string
+    #     ha='left', va='center', transform=ax.transAxes  # Use relative coordinates
+    # )
+    cax = ax.inset_axes([0.12, 0.1, 0.3, 0.02])
+    cbar = fig.colorbar(pl,cax=cax, orientation='horizontal' ,ticks=[int(levels[0]),0, int(levels[-1])])
+    cbar.ax.tick_params(labelsize=16)
+    cbar.ax.set_xticklabels([int(levels[0]),0, int(levels[-1])])  # horizontal colorbar
+    cbar.ax.set_title("zon wind ano (m/s)", fontsize=14)
